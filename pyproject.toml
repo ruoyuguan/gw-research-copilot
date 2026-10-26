@@ -35,7 +35,7 @@ dependencies = [
 theory = ["sympy>=1.13,<2"]
 dev = [
   "build>=1.2,<2",
-  "pytest>=8,<9",
+  "pytest>=8,<10",
   "PyYAML>=6,<7",
   "ruff>=0.9,<1",
 ]
