@@ -1,0 +1,8 @@
+{
+  "data_origin": "synthetic",
+  "description": "Synthetic two-dimensional covariance; not detector data.",
+  "matrix": [
+    [2.0, 0.3],
+    [0.3, 1.0]
+  ]
+}

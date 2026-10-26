@@ -1,0 +1,48 @@
+name: Software bug report
+description: Report a reproducible GWRC command, API, or installation defect
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, unpublished notes, private configurations, restricted collaboration data, or identifying logs.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and error
+      description: Include the actual exit code and a sanitized error message.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Provide the exact command and a small synthetic input where possible.
+      placeholder: "gwrc check-cov input.json --output-dir runs/reproduction"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: GWRC version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python, NumPy/SciPy versions, and optional ARC version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or record excerpts
+      description: Remove local personal paths, tokens, private inputs, and restricted research material.

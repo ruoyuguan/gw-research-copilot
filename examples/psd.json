@@ -1,0 +1,12 @@
+{
+  "data_origin": "synthetic",
+  "description": "Synthetic tabulated auto-spectrum; not LISA or TianQin data.",
+  "frequency": [0.0, 1.0, 2.0, 4.0],
+  "psd": [1.0, 1.5, 1.25, 0.5],
+  "frequency_unit": "Hz",
+  "psd_unit": "synthetic_amplitude^2/Hz",
+  "psd_definition": "Synthetic auto power spectral density samples; no estimator, fitting, or sidedness conversion is applied.",
+  "spectral_convention": "one-sided",
+  "fourier_convention": "No Fourier transform is performed by this array-only example.",
+  "frequency_order": "increasing"
+}

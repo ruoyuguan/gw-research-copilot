@@ -1,0 +1,40 @@
+name: Scientific convention or validation question
+description: Discuss a numerical model, scientific assumption, or validation boundary
+title: "[Science] "
+labels: ["scientific-validation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use public or synthetic material only. A numerical check does not automatically validate a scientific conclusion.
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+      description: State the quantity or model being discussed and the intended scope.
+    validations:
+      required: true
+  - type: textarea
+    id: conventions
+    attributes:
+      label: Definitions and conventions
+      description: Include data dimensions, units, Fourier/PSD conventions, channel definitions, and statistical assumptions.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reference result or source
+      description: Provide a real, checkable source or an independent analytic/numerical reference.
+    validations:
+      required: true
+  - type: textarea
+    id: numerical
+    attributes:
+      label: Numerical policy
+      description: Describe tolerances, conditioning, sampling, and any warnings or failed checks.
+  - type: textarea
+    id: limitation
+    attributes:
+      label: Known limitations and requested review
+      description: Distinguish established evidence, interpretation, and unresolved assumptions.

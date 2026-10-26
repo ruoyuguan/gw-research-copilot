@@ -1,0 +1,45 @@
+# Python environments, packaging, and test artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv-*/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.whl
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+.ssh/
+
+# Local tools, upstream checkouts, and ARC state
+.local/
+local/
+.arc/
+.ac/
+
+# Research inputs and generated results are opt-in, not public by default
+/data/
+/private/
+/runs/
+paper-source/
+
+# Editors, operating systems, and temporary files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.zip
+*.tar.gz

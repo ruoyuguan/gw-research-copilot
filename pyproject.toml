@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gw-research-copilot"
+version = "0.1.0"
+description = "Host-independent agent skills and deterministic tools for gravitational-wave research."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "GW Research Copilot contributors" }]
+requires-python = ">=3.11"
+keywords = [
+  "gravitational-waves",
+  "agent-skills",
+  "scientific-computing",
+  "reproducibility",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+  "numpy>=2.0,<3",
+  "scipy>=1.14,<2",
+]
+
+[project.optional-dependencies]
+theory = ["sympy>=1.13,<2"]
+dev = [
+  "build>=1.2,<2",
+  "pytest>=8,<9",
+  "PyYAML>=6,<7",
+  "ruff>=0.9,<1",
+]
+
+[project.scripts]
+gwrc = "gwrc.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gwrc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "SIM", "UP"]
