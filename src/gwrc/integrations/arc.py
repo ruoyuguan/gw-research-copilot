@@ -32,18 +32,33 @@ class ARCStatus:
         }
 
 
-def _arc_command(environment: Mapping[str, str]) -> tuple[str, ...] | None:
-    configured = environment.get("GWRC_ARC_PAPER")
-    if configured:
-        path = Path(configured).expanduser()
+def _arc_command(
+    environment: Mapping[str, str],
+) -> tuple[tuple[str, ...], bool] | None:
+    paper = environment.get("GWRC_ARC_PAPER")
+    runtime = environment.get("GWRC_ARC_RUNTIME")
+    if paper and runtime:
+        raise IntegrationError(
+            "GWRC_ARC_PAPER and GWRC_ARC_RUNTIME must not both be set"
+        )
+    if runtime:
+        path = Path(runtime).expanduser()
+        if not path.is_file():
+            raise IntegrationError(
+                "GWRC_ARC_RUNTIME does not point to an arc-runtime executable: "
+                f"{runtime}"
+            )
+        return (str(path),), True
+    if paper:
+        path = Path(paper).expanduser()
         if not path.is_file():
             raise IntegrationError(
                 "GWRC_ARC_PAPER does not point to an arc-paper executable: "
-                f"{configured}"
+                f"{paper}"
             )
-        return (str(path),)
+        return (str(path),), False
     discovered = shutil.which("arc-paper")
-    return (discovered,) if discovered else None
+    return ((discovered,), False) if discovered else None
 
 
 class ArcPaperClient:
@@ -53,30 +68,45 @@ class ArcPaperClient:
         self,
         command: Sequence[str] | None = None,
         *,
+        runtime: bool = False,
         timeout: float = 60.0,
         environment: Mapping[str, str] | None = None,
     ) -> None:
-        """Resolve an explicit command or the GWRC_ARC_PAPER/PATH installation."""
+        """Resolve a direct paper CLI, official runtime launcher, or PATH command."""
         if not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("ARC timeout must be finite and positive")
         self.timeout = timeout
         self.environment = os.environ if environment is None else environment
-        self.command = (
-            tuple(command)
-            if command is not None
-            else _arc_command(self.environment)
-        )
+        if command is not None:
+            if not command:
+                raise ValueError("ARC command must not be empty")
+            self.command = tuple(command)
+            self.runtime = runtime
+        else:
+            resolved = _arc_command(self.environment)
+            self.command, self.runtime = resolved or (None, runtime)
 
-    def _run(self, arguments: Sequence[str], timeout: float) -> str:
+    def _run(
+        self,
+        arguments: Sequence[str],
+        timeout: float,
+        *,
+        runtime_doctor: bool = False,
+    ) -> str:
         if self.command is None:
             raise IntegrationError(
-                "ARC is not configured. Install arc-paper separately or set "
-                "GWRC_ARC_PAPER to its executable; local scientific tools "
-                "remain available."
+                "ARC is not configured. Install arc-paper separately, set "
+                "GWRC_ARC_PAPER, or configure GWRC_ARC_RUNTIME; local "
+                "scientific tools remain available."
             )
+        operation = "arc-runtime doctor" if runtime_doctor else "arc-paper"
+        command = list(self.command)
+        if self.runtime and not runtime_doctor:
+            command.append("arc-paper")
+        command.extend(arguments)
         try:
             completed = subprocess.run(
-                [*self.command, *arguments],
+                command,
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
@@ -86,25 +116,64 @@ class ArcPaperClient:
             )
         except subprocess.TimeoutExpired as exc:
             raise IntegrationError(
-                f"arc-paper exceeded the {timeout:g}-second timeout"
+                f"{operation} exceeded the {timeout:g}-second timeout"
             ) from exc
         except OSError as exc:
-            raise IntegrationError(f"cannot execute arc-paper: {exc}") from exc
+            raise IntegrationError(f"cannot execute {operation}: {exc}") from exc
         if completed.returncode != 0:
             detail = completed.stderr.strip() or completed.stdout.strip()
             raise IntegrationError(
-                f"arc-paper exited with code {completed.returncode}: {detail[:2000]}"
+                f"{operation} exited with code {completed.returncode}: {detail[:2000]}"
             )
         return completed.stdout
 
+    def _probe_runtime(self) -> ARCStatus:
+        try:
+            output = self._run(
+                ("doctor",), min(self.timeout, 15.0), runtime_doctor=True
+            )
+            document = json.loads(output)
+        except IntegrationError as exc:
+            return ARCStatus(
+                "failed",
+                f"ARC runtime is not ready or doctor failed: {exc}",
+                self.command,
+            )
+        except json.JSONDecodeError:
+            return ARCStatus(
+                "failed", "arc-runtime doctor returned invalid JSON", self.command
+            )
+        if (
+            not isinstance(document, dict)
+            or document.get("schema_version") != "ac.runtime_doctor.v1"
+        ):
+            return ARCStatus(
+                "failed",
+                "arc-runtime doctor returned an unrecognized output contract",
+                self.command,
+            )
+        if document.get("ready") is not True:
+            return ARCStatus(
+                "failed",
+                "ARC runtime is not ready; run the official setup before research",
+                self.command,
+            )
+        return ARCStatus(
+            "available",
+            "ARC runtime doctor reports ready; paper-network access is not tested",
+            self.command,
+        )
+
     def probe(self) -> ARCStatus:
-        """Check only local CLI readiness; do not make a paper-network request."""
+        """Check local CLI readiness without installing or querying providers."""
         if self.command is None:
             return ARCStatus(
                 "not_configured",
                 "ARC is optional and arc-paper was not found; "
                 "local tools are available",
             )
+        if self.runtime:
+            return self._probe_runtime()
         try:
             output = self._run(("--help",), min(self.timeout, 15.0))
         except IntegrationError as exc:

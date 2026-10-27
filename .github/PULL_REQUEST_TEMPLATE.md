@@ -19,6 +19,7 @@
 - [ ] Numerical success is not presented as proof of physical correctness.
 - [ ] Public claims match implemented and tested behavior.
 - [ ] Documentation and source/ARC attribution were updated.
+- [ ] Substantial AI assistance, if any, is disclosed with the tool and reliably known model/configuration details; no account secrets are included.
 
 ## Safety
 

@@ -53,6 +53,12 @@ A pull request should include:
 
 Reviewers may request independent numerical checks or stronger provenance before approving scientific changes.
 
+## AI-assisted development and attribution
+
+Human submitters must review AI-assisted changes, ensure they have the right to submit them, and provide the required test and scientific evidence. Using another model does not by itself make a check independent or a conclusion correct.
+
+For substantial AI assistance, disclose the tool and reliably known model/configuration details in the pull request or [CONTRIBUTORS.md](CONTRIBUTORS.md). Distinguish maintainer-reported configurations from independently verified facts; do not guess unknown model versions or invent AI GitHub identities and email addresses. Do not include account identifiers, tokens, billing details, private prompts, or restricted research material. Current project roles and attribution boundaries are recorded in [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
 ## Security and private research material
 
 Never commit API keys, tokens, passwords, `.env` files, private configurations, unpublished notes, restricted collaboration data, model caches, or identifying local logs. Use the private process in `SECURITY.md` for vulnerabilities rather than a public issue.

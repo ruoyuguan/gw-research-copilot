@@ -163,3 +163,25 @@ def test_arc_failure_has_an_honest_failed_record(tmp_path: Path) -> None:
     assert record["status"] == "failed"
     assert record["result"] is None
     assert record["failure"]["type"] == "IntegrationError"
+
+
+def test_non_scientific_commands_avoid_heavy_imports(tmp_path: Path) -> None:
+    script = (
+        "from gwrc.cli.main import build_parser, main\n"
+        "import sys\n"
+        "build_parser()\n"
+        "main(['doctor', '--json'])\n"
+        f"main(['skills', 'list', '--scope', 'user', '--root', r'{tmp_path}'])\n"
+        "assert 'numpy' not in sys.modules, 'non-scientific CLI imported NumPy'\n"
+        "assert 'scipy' not in sys.modules, 'non-scientific CLI imported SciPy'\n"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr

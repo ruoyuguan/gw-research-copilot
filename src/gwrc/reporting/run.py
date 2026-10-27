@@ -6,7 +6,6 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
@@ -15,6 +14,7 @@ import numpy as np
 import scipy
 
 from gwrc import __version__
+from gwrc.core.environment import distribution_version
 from gwrc.core.errors import GWRCError, InputError
 from gwrc.core.json_utils import json_text, to_builtin
 
@@ -267,9 +267,4 @@ class RunRecorder:
         return self._write(record)
 
 
-def distribution_version(name: str) -> str | None:
-    """Return an installed distribution version without importing optional packages."""
-    try:
-        return version(name)
-    except PackageNotFoundError:
-        return None
+__all__ = ["RunRecorder", "distribution_version"]

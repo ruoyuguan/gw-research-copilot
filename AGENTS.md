@@ -7,11 +7,13 @@ GWRC 提供宿主无关的引力波科研 Skills、确定性数值工具和可�
 ## 工程结构
 
 - `src/gwrc/tools/` 只放可独立测试的科学 API，不读取 Agent 配置或调用模型。
-- `src/gwrc/cli/` 负责输入文档、退出码和用户交互。
+- `src/gwrc/cli/` 负责输入文档、退出码和用户交互；非科学命令不在顶层加载 NumPy/SciPy，科学处理函数与记录器按需加载。
 - `src/gwrc/integrations/` 只封装已核实的公开外部接口；外部能力缺失不得影响核心工具。
 - `src/gwrc/reporting/` 负责运行记录，不包含科学判据。
-- `.agents/skills/` 描述工作流，不作为 Python 包的运行时依赖。
-- 文档主要使用中文；README 与国际社区文件使用英文。公共 Python API 使用类型标注和 docstring，遵循 PEP 8。
+- `.agents/skills/` 是工作流内容的唯一来源；科学工具不读取它，`skill_install.py` 负责从源码或 wheel 资源安装 Skills。
+- `src/gwrc/skill_install.py` 负责用户级/项目级安装、清单、启动器与安全卸载，不得覆盖或递归删除未授权文件。
+- `README.md` 是英文主文档，`README.zh-CN.md` 是中文版本；功能、限制、安装和宿主支持变化必须同步。`CONTRIBUTORS.md` 记录实际贡献和 AI 辅助开发/验证，不伪造人员、模型版本或 Git 身份。
+- 其他文档主要使用中文，国际社区文件使用英文。公共 Python API 使用类型标注和 docstring，遵循 PEP 8。
 
 ## 科学不变量
 
@@ -37,4 +39,4 @@ python -m build
 
 使用 feature branch + Pull Request。不要提交 `.venv*`、`.local/`、`runs/`、缓存、私有输入、`.env`、密钥或个人日志。修改公共命令、科学约定或目录职责时，同步更新 README、相关文档和测试。引用 ARC 或其他上游代码时保留其许可证和署名；GWRC 不是 ARC 官方项目。
 
-未经用户明确授权，不修改全局 Agent/Git 配置，不创建组织，不公开仓库，不推送远程。首次公开前必须检查暂存内容、完整历史与 secret scanning，并单独取得确认。
+未经用户明确授权，不修改全局 Agent/Git 配置，不创建组织，不公开仓库，不推送远程。用户级 Skills 安装只能在用户明确要求后写入约定的 Skills、manifest 和启动器路径，不得覆盖其他文件。首次公开前必须检查暂存内容、完整历史与 secret scanning，并单独取得确认。

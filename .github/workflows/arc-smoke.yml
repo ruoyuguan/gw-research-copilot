@@ -1,0 +1,65 @@
+name: ARC Linux smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  arc-linux-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ARC_COMMIT: b717cca9e1aec4436726b98c61e0ee27edcc0319
+      AC_FOUNDATION_COMMIT: 251c0f06bb45a4905d0b3f5e7649a40786fc2698
+      AC_INSTALL_UV: ${{ github.workspace }}/.local/tools/uv-x86_64-unknown-linux-gnu/uv
+      ARC_REPO_ROOT: ${{ github.workspace }}/.local/upstream/arc
+      AC_FOUNDATION_REPO_ROOT: ${{ github.workspace }}/.local/upstream/ac-foundation
+      GWRC_ROOT: ${{ github.workspace }}
+      VALIDATION_ROOT: ${{ github.workspace }}/.local/arc-validation
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out ARC at the validated commit
+        uses: actions/checkout@v4
+        with:
+          repository: tririver/arc
+          ref: ${{ env.ARC_COMMIT }}
+          path: .local/upstream/arc
+      - name: Check out AC Foundation at the validated commit
+        uses: actions/checkout@v4
+        with:
+          repository: tririver/ac-foundation
+          ref: ${{ env.AC_FOUNDATION_COMMIT }}
+          path: .local/upstream/ac-foundation
+      - name: Install and verify Linux uv
+        shell: bash
+        run: |
+          curl -fL --retry 2 -o "$RUNNER_TEMP/uv.tar.gz" \
+            https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-unknown-linux-gnu.tar.gz
+          curl -fL --retry 2 -o "$RUNNER_TEMP/uv.tar.gz.sha256" \
+            https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-unknown-linux-gnu.tar.gz.sha256
+          python3 - <<'PY'
+          import hashlib
+          import os
+          from pathlib import Path
+
+          temporary = Path(os.environ["RUNNER_TEMP"])
+          expected = (temporary / "uv.tar.gz.sha256").read_text().split()[0]
+          actual = hashlib.sha256((temporary / "uv.tar.gz").read_bytes()).hexdigest()
+          assert actual == expected == "f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f"
+          print("uv 0.13.5 SHA-256 verified:", actual)
+          PY
+          mkdir -p "${{ github.workspace }}/.local/tools"
+          tar -xzf "$RUNNER_TEMP/uv.tar.gz" -C "${{ github.workspace }}/.local/tools"
+      - name: Validate ARC and the GWRC runtime adapter
+        shell: bash
+        run: bash scripts/validate_arc_linux.sh
+      - name: Upload public validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arc-linux-validation
+          path: ${{ github.workspace }}/.local/verification/arc-linux-*/
+          if-no-files-found: error
+          retention-days: 7

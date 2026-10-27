@@ -1,0 +1,8 @@
+{
+  "data_origin": "synthetic",
+  "description": "Two-channel synthetic covariance for host acceptance testing; not an estimated detector covariance.",
+  "matrix": [
+    [1.0, 0.2],
+    [0.2, 2.0]
+  ]
+}

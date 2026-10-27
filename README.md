@@ -1,5 +1,7 @@
 # GW Research Copilot (GWRC)
 
+**English** | [中文](README.zh-CN.md)
+
 **Early-development research software (0.1.0).** GWRC is a host-independent set of agent workflows, deterministic scientific checks, and reproducibility records for gravitational-wave research. It is not a language model, an automated source of scientific truth, or an official product of ARC, LISA, TianQin, or any university or laboratory.
 
 The first MVP focuses on covariance and auto-PSD validation, a deliberately limited Gaussian Fisher example, and evidence-conscious agent skills. It does **not** implement a complete LISA/TianQin analysis pipeline, a Bayesian sampler, a DWD population model, or a full SGWB Fisher calculator.
@@ -10,6 +12,7 @@ The first MVP focuses on covariance and auto-PSD validation, a deliberately limi
 - `check-psd`: one-dimensional real auto-spectrum checks, frequency order and uniqueness, non-negativity, and required unit / spectral-convention declarations.
 - `fisher-demo`: a synthetic real Gaussian mean model with a fixed covariance, solved by Cholesky factorization and compared with an analytic Fisher matrix.
 - `doctor`: reports required and optional dependencies, static project-skill discovery, and optional ARC status.
+- `skills install/list/uninstall`: installs packaged Skills for a user or project, checks real CLI availability, and preserves modified or unrelated files on removal.
 - Every scientific command can write a new `run.json` and `report.md` containing input digests, parameters, software versions, timestamps, results, warnings, and failures.
 
 A valid singular covariance is not silently treated as invertible. A passing numerical check does not establish that a Gaussian model, PSD definition, detector response, or scientific conclusion is appropriate.
@@ -56,6 +59,17 @@ python -m pytest -q
 ```
 
 `doctor` does not query paper providers. An unconfigured optional ARC installation does not prevent local scientific tools from working.
+
+## Cross-project skill installation
+
+After installing the Python package, install the Skills and a launcher bound to that Python environment:
+
+```bash
+gwrc skills install --scope user
+gwrc skills list --scope user
+```
+
+The installer writes the four Skills to `$HOME/.agents/skills` and a CLI launcher to `$HOME/.local/bin` (including `gwrc.cmd` on Windows). That bin directory must already be on PATH; GWRC does not modify your shell or host configuration. You can then open an independent research project without copying Skill files or activating the original venv. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for custom directories, PATH troubleshooting, project-scope installation, and safe uninstall behavior.
 
 ## Quick start with synthetic data
 
@@ -132,7 +146,9 @@ Start a new session after changing skill configuration. This blocks automatic mo
 
 ### Codex, Claude Code, and other hosts
 
-The Python CLI is independent of the agent host. The skill files use portable Markdown/YAML conventions, but their discovery and invocation on Codex and Claude Code have not been live-tested for this release; do not interpret that as verified native integration. Host-specific packaging can be added after real smoke tests. No model account, paid API, or model provider is selected by the numerical tools.
+The Python CLI is independent of the agent host. The skill files use portable Markdown/YAML conventions. The [official Codex Skills documentation](https://developers.openai.com/codex/skills) lists `$HOME/.agents/skills` as a user-level location. Windows maintainer tests with `codex-cli 0.162.0-alpha.17.2` first exposed a sandbox execution failure with the installed Microsoft Store Python. With an isolated standard CPython 3.12.15 environment and a launcher bound to it, a subsequent user-level `$gw-statistics` run under `workspace-write` completed valid and intentionally invalid checks with the expected exit codes and verified `run.json`/`report.md` records. The inputs remained unchanged. This verifies the Codex CLI workflow in that specific environment, not every Python distribution.
+
+The VS Code Codex graphical interface and Claude Code have not been live-tested for this release. A CLI result does not establish native IDE integration or acceptance by an independent researcher. See [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) for both the initial failure and the successful follow-up. Host-specific packaging can be added after real smoke tests. No model account, paid API, or model provider is selected by the numerical tools.
 
 ## Optional ARC metadata bridge
 
@@ -144,9 +160,9 @@ gwrc doctor --json
 gwrc arc-metadata arXiv:0911.3380 --output-dir runs/arc-metadata-demo
 ```
 
-On Windows, use the environment's `arc-paper.exe` path and your shell's normal environment-variable syntax. `doctor` checks only the local CLI help contract. A successful metadata operation can use ARC's cache or a provider and does not by itself constitute a literature review.
+On Windows, use the environment's `arc-paper.exe` path and your shell's normal environment-variable syntax. For an official launcher, set `GWRC_ARC_RUNTIME` instead; runtime probing uses read-only `arc-runtime doctor` and does not trigger setup. A successful metadata operation can use ARC's cache or a provider and does not by itself constitute a literature review.
 
-**Current verification status:** local ARC CLI installation and `doctor` probing succeeded on Windows, but actual metadata retrieval is blocked by a reproduced upstream `ac-jobs` Windows file-lock release error. Thus `arc-metadata` is an experimental bridge, not a functioning literature service on this machine. The numerical tools are unaffected. See [docs/ARC_INTEGRATION.md](docs/ARC_INTEGRATION.md) for exact commits, evidence, and unsupported workflows. Offline tests do not require ARC.
+**Current verification status:** the official ARC runtime in WSL2 Ubuntu completed metadata, table-of-contents, full-text search, and section reading, and the `GWRC_ARC_RUNTIME` adapter passed. Native Windows CLI probing works, but native Windows metadata retrieval remains blocked by the reproduced upstream `ac-jobs` file-lock release error. The numerical tools are unaffected. See [docs/ARC_INTEGRATION.md](docs/ARC_INTEGRATION.md) for exact commits, evidence, and unsupported workflows. Offline tests do not require ARC.
 
 ## Development and project layout
 
@@ -173,6 +189,12 @@ python -m build
 ```
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and [docs/ROADMAP.md](docs/ROADMAP.md). Contributions follow the feature-branch + pull-request workflow described in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributors and AI-assisted development
+
+Development in this stage used the Kimi Code VS Code extension. The maintainer reports a development configuration of **K3.1 Pro with Thinking effort: Max**. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the human maintainer, AI-assisted implementation, and Codex CLI validation roles.
+
+These records disclose development assistance; they do not assign legal authorship or copyright ownership, and they do not make AI output scientifically correct by default. Human maintainers remain responsible for review, test evidence, scientific interpretation, and release decisions.
 
 ## License and scientific disclaimer
 

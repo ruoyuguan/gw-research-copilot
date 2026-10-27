@@ -10,10 +10,10 @@
 | GWRC 核心工具在没有 ARC 时运行 | 已实现并离线测试 | ARC 不在 `pyproject.toml` 核心依赖中 |
 | 独立 `arc-paper` 环境安装 | 本机已验证 | `arc-paper 2.1.0`；AC 包 `2.2.0`；`pip check` 无冲突 |
 | `arc-paper --help` 与 GWRC `doctor` 探测 | 本机已验证 | 仅证明本地 CLI 可执行，不证明论文服务可用 |
-| `gwrc arc-metadata` 真实公开论文请求 | **当前 Windows 上未接通** | 上游 `ac-jobs` 文件锁释放报 `PermissionError`，详见第 4 节 |
+| `gwrc arc-metadata` 真实公开论文请求 | WSL2 Ubuntu 已通过；Windows 原生未接通 | Linux `completed`；Windows 上游 `ac-jobs` 锁释放报 `PermissionError`，详见第 4 节 |
 | Kimi 项目 Skills 加载与 Skill 工具调用 | 本机已观察到 | 项目 Skill 被宿主发现并展开；不等于 ARC 原生插件或自动路由保证 |
-| ARC 官方 runtime 安装 | 当前 Windows 上未执行 setup | 只读 doctor 返回 `ready=false`，POSIX flock 所有权不可验证 |
-| Linux/macOS 官方 runtime | 待验证 | 本机没有完成这些平台的实际安装与 smoke |
+| ARC 官方 runtime 安装 | Windows 未执行 setup；WSL2 Ubuntu 已通过 | Windows 的 POSIX flock 所有权不可验证；Linux 官方 runtime ready |
+| Linux/macOS 官方 runtime | Linux 已验证；macOS 待验证 | WSL2 原生 checkout 和 `/tmp` 中完成真实文献流程 |
 | `arc-domain`、模型摘要、managed calculate/check | 暂不支持 | 未接入，未调用模型，不伪造集成状态 |
 | ALC、AC proposer-reviewer、AC jobs 作为 GWRC 记录后端 | 暂不支持 | 本阶段无适配器；ARC 自身会传递使用其所需 AC 包 |
 
@@ -81,6 +81,23 @@ ALC 负责 OCR 校对、翻译、Companion 和 HTML 阅读器，不是当前文�
 
 只读执行官方 `arc-runtime doctor` 返回退出码 1 和 `ready=false`：`lock.probe.state=ownership_unverifiable`、`reason=ModuleNotFoundError`，锁机制为 POSIX flock。官方 runtime 文档也说明其安装锁支持 Linux/macOS。未在不适用的当前 Windows 环境中强行 setup，未删除锁文件或修改全局 AC 配置。
 
+### WSL2 Ubuntu 完整文献流程（已通过）
+
+随后在 WSL2 Ubuntu 中使用 `uv 0.13.5`（SHA-256 `f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f`）和 `AC_INSTALL_SOURCE=local` 运行官方 runtime。ARC 与 Foundation checkout 均为上述固定 commit，源码、runtime、venv 和缓存位于 WSL 原生 `/tmp`，不是 Windows 默认锁环境的复用，也不是默认 Git source-pin 的宣称。
+
+Windows 挂载源码只用于创建原生 checkout，解决了 Git safe.directory 和 CRLF 对 Bash launcher 的影响；没有修改上游文件或全局 Git 配置。WSL 的 systemd 用户会话警告未阻止该流程。结果在同一运行中复制到 `.local/verification/`，避免 `/tmp` 后续清理造成证据丢失。
+
+对 `arXiv:0911.3380` 实际完成并通过结构化检查：
+
+- 官方 runtime `ready=true`；
+- 元数据标题为 *Quasi-Single Field Inflation and Non-Gaussianities*；
+- 目录返回 23 个 entries；
+- `isocurvaton` 全文检索返回 25 个 occurrences；
+- 成功读取 `8 Conclusion and discussion`，并保留 `data.source.document` 引用；
+- `GWRC_ARC_RUNTIME` 的只读 doctor 和 `gwrc arc-metadata` 均完成，运行记录为 `status=completed`，上游响应也是 `completed`。
+
+证据位于 Git 忽略的 `.local/verification/arc-linux-gwrc-arc-validation.IqjjpZ/results/`。`scripts/validate_arc_linux.sh` 固化相同流程。修正 workflow 的 runner 上下文后，[ARC Linux smoke 40441495383](https://github.com/ruoyuguan/gw-research-copilot/actions/runs/40441495383) 已在 GitHub Ubuntu runner 成功完成，并上传 `arc-linux-validation` artifact；论文结构检查结果与本地一致。
+
 ### 真实元数据调用失败
 
 实际执行：
@@ -104,7 +121,8 @@ GWRC_ARC_PAPER=.local/arc-venv/Scripts/arc-paper.exe \
 生产适配器只通过公开 CLI 调用：
 
 - `GWRC_ARC_PAPER` 指向独立 `arc-paper` 可执行文件，或从 `PATH` 发现；
-- `doctor` 区分 `not_configured`、`available`、`failed`，且不发起文献网络请求；
+- `GWRC_ARC_RUNTIME` 指向官方 launcher，并以 `arc-runtime arc-paper ...` 调用；两个显式变量同时设置会报配置错误；
+- `doctor` 区分 `not_configured`、`available`、`failed`，且不发起文献网络请求；runtime 模式只读 `arc-runtime doctor` 并检查 `ready`，不触发懒安装；
 - 子进程有超时，保留退出码和有界错误信息；
 - 元数据操作严格检查 `ac.command_result.v2`、`completed`、`data` 和 `error`；
 - 元数据可能来自缓存，不能将一次调用笼统声明为实际联网；
@@ -125,7 +143,7 @@ ARC README 的官方插件安装路径覆盖 Codex、Claude Code 和 DeepSeek Ha
 
 ## 7. 后续最小接入顺序
 
-1. 修复并验证上游 Windows 文件锁，或在官方支持的 Linux/macOS runtime 完成真实公开元数据 smoke。
-2. 固定验证后的 ARC/AC commit，扩展少量 `arc-paper` 结构读取与缓存 provenance，保持默认离线。
+1. 以已通过的 WSL2 流程为基线，推进上游 Windows 文件锁修复和 macOS 验证；上游 Issue/PR 需另行确认。
+2. 固定已验证的 ARC/AC commit，扩展少量结构读取与缓存 provenance 适配，保持默认离线。
 3. 在有真实文献任务后，再评估 `arc-domain` 和 managed workflow 的模型、成本、宿主独立上下文及状态适配。
 4. 只有完成目标宿主实际安装与调用测试后，才增加或声明宿主专用插件。

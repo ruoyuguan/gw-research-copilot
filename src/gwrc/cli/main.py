@@ -1,5 +1,7 @@
 """The host-independent GWRC command-line interface."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import math
@@ -7,16 +9,17 @@ import shutil
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from gwrc import __version__
+from gwrc.cli.skills import register_skills_commands
+from gwrc.core.environment import distribution_version
 from gwrc.core.errors import GWRCError, InputError
 from gwrc.core.json_utils import json_text
 from gwrc.integrations.arc import ArcPaperClient, probe_arc
-from gwrc.reporting.run import RunRecorder, distribution_version
-from gwrc.tools.covariance import CovarianceTolerances, check_covariance
-from gwrc.tools.fisher import fisher_demo
-from gwrc.tools.psd import PSDTolerances, check_psd
+
+if TYPE_CHECKING:
+    from gwrc.tools.covariance import CovarianceTolerances
 
 
 def _finite_float(value: str) -> float:
@@ -59,6 +62,8 @@ def _recorded(
     input_files: list[Path],
     operation: Callable[[], tuple[dict[str, Any], bool]],
 ) -> int:
+    from gwrc.reporting.run import RunRecorder
+
     recorder = RunRecorder(
         tool=tool,
         output_dir=output_dir,
@@ -79,21 +84,31 @@ def _recorded(
 
 
 def _covariance_tolerances(args: argparse.Namespace) -> CovarianceTolerances:
+    from gwrc.tools.covariance import CovarianceTolerances
+
+    names = (
+        "symmetry_rtol",
+        "symmetry_atol",
+        "eigenvalue_rtol",
+        "eigenvalue_atol",
+        "rank_rtol",
+        "rank_atol",
+        "condition_warning",
+    )
+    values = {
+        name: getattr(args, name)
+        for name in names
+        if getattr(args, name) is not None
+    }
     try:
-        return CovarianceTolerances(
-            symmetry_rtol=args.symmetry_rtol,
-            symmetry_atol=args.symmetry_atol,
-            eigenvalue_rtol=args.eigenvalue_rtol,
-            eigenvalue_atol=args.eigenvalue_atol,
-            rank_rtol=args.rank_rtol,
-            rank_atol=args.rank_atol,
-            condition_warning=args.condition_warning,
-        )
+        return CovarianceTolerances(**values)
     except ValueError as exc:
         raise InputError(f"invalid covariance tolerance: {exc}") from exc
 
 
 def _check_covariance(args: argparse.Namespace) -> int:
+    from gwrc.tools.covariance import check_covariance
+
     payload = _read_json(args.input)
     tolerances = _covariance_tolerances(args)
 
@@ -121,6 +136,8 @@ def _check_covariance(args: argparse.Namespace) -> int:
 
 
 def _check_psd(args: argparse.Namespace) -> int:
+    from gwrc.tools.psd import PSDTolerances, check_psd
+
     payload = _read_json(args.input)
     _required(payload, "frequency")
     _required(payload, "psd")
@@ -165,6 +182,8 @@ def _check_psd(args: argparse.Namespace) -> int:
 
 
 def _fisher_demo(args: argparse.Namespace) -> int:
+    from gwrc.tools.fisher import fisher_demo
+
     def operation() -> tuple[dict[str, Any], bool]:
         try:
             demo = fisher_demo(rtol=args.reference_rtol, atol=args.reference_atol)
@@ -325,7 +344,6 @@ def build_parser() -> argparse.ArgumentParser:
         "input", type=Path, help="JSON object containing matrix"
     )
     _output_argument(covariance)
-    defaults = CovarianceTolerances()
     for name in (
         "symmetry_rtol",
         "symmetry_atol",
@@ -338,7 +356,7 @@ def build_parser() -> argparse.ArgumentParser:
         covariance.add_argument(
             "--" + name.replace("_", "-"),
             type=float,
-            default=getattr(defaults, name),
+            default=None,
             dest=name,
         )
     covariance.set_defaults(handler=_check_covariance)
@@ -380,6 +398,11 @@ def build_parser() -> argparse.ArgumentParser:
     _output_argument(arc)
     arc.add_argument("--timeout", type=float, default=60.0)
     arc.set_defaults(handler=_arc_metadata)
+
+    skills = commands.add_parser(
+        "skills", help="install, inspect, and remove GWRC Agent Skills"
+    )
+    register_skills_commands(skills)
     return parser
 
 
