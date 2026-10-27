@@ -1,0 +1,12 @@
+{
+  "data_origin": "synthetic",
+  "description": "Synthetic auto-spectrum for host acceptance testing; not detector data.",
+  "frequency": [0.0, 1.0, 2.0, 4.0],
+  "psd": [1.0, 0.5, 0.25, 0.125],
+  "frequency_unit": "Hz",
+  "psd_unit": "synthetic_strain^2/Hz",
+  "psd_definition": "Tabulated one-sided auto power spectral density of a synthetic strain-like series; no estimator or sidedness conversion is applied.",
+  "spectral_convention": "one-sided",
+  "fourier_convention": "No Fourier transform is performed by this array-only example.",
+  "frequency_order": "increasing"
+}

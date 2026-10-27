@@ -22,7 +22,9 @@ python -m pytest -q
 python -m pip check
 gwrc --help
 gwrc doctor --json
+gwrc skills list --scope user
 python examples/run_mvp.py --output-dir runs/development-mvp
+bash -n scripts/validate_arc_linux.sh
 python -m build
 ```
 
@@ -47,6 +49,7 @@ python -m venv .venv-wheel-check
 4. 测试合法、奇异/病态、非有限、形状和约定错误；禁止用同一实现的输出充当唯一参考。
 5. 同步科学约定、README、Skill 和运行记录参数。删除或改写描述旧行为的注释与文档。
 6. 实际执行相关 CLI 和端到端示例，不能仅凭 import/compile 声称可用。
+7. 保持 `--help`、`doctor` 和 Skills 管理命令轻量，不在 CLI 顶层加载 NumPy/SciPy；科学处理函数和 `RunRecorder` 按需加载，并用启动路径测试防止回归。
 
 绝对容差与被检查量同单位；相对容差无量纲。不要把 PSD 容差、Hermitian 容差和数值秩容差混为一个不可解释的 `epsilon`。
 
@@ -57,6 +60,18 @@ python -m venv .venv-wheel-check
 adapter 只使用公开 CLI/Python API，检查版本/信封、退出码和错误。缺失、不可用和已验证可用必须不同。不得创建永远返回成功的生产 mock backend。测试中的传输替身只验证 GWRC 错误处理。
 
 真实联网 smoke 使用公开文献、有限次数和独立输出目录。不得上传私人论文、组内笔记、令牌或受限合作资料。联网失败不阻塞离线测试，也不得把失败改写成集成成功。
+
+### Linux ARC 验证
+
+准备固定 commit 的 ARC/AC checkout 和经校验的 Linux uv 后，在 WSL 或原生 Linux 执行：
+
+```bash
+AC_INSTALL_UV=/path/to/verified/linux/uv bash scripts/validate_arc_linux.sh
+```
+
+脚本检查固定 commit，使用 WSL 原生 `/tmp` 创建新 runtime、venv 和缓存，不需要 sudo。Windows 挂载源码只用于创建原生 checkout；Git `safe.directory` 和换行差异只在当前命令中处理，不修改全局配置。公开论文的 metadata、目录、全文检索、章节及 GWRC runtime 适配都必须通过结构化检查。
+
+精简证据复制到 Git 忽略的 `.local/verification/arc-linux-*`，不依赖 `/tmp` 在后续调用中持久存在。默认 CI 不访问文献服务；手动 Ubuntu smoke 与离线回归分开。
 
 ## 5. 分支、提交与发布
 

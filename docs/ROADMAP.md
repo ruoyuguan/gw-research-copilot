@@ -4,6 +4,12 @@
 
 范围是本地、离线可测试的 covariance/PSD/Fisher 工具、JSON/Markdown 记录、四个 Skills 和最小 ARC 文献元数据桥。路线图中其他能力均不是当前功能承诺。
 
+## 当前用户可用性阶段
+
+已验证用户级 Skill 安装、PATH 启动器、安全卸载、wheel 资源，以及 WSL2 Ubuntu 上固定 ARC/AC commit 的官方 runtime、公开论文结构读取和 GWRC runtime 适配。`scripts/validate_arc_linux.sh` 固化该流程。
+
+仍需完成真实 Kimi/Codex 宿主 smoke 和未参与开发的组员验收；在此之前不宣称 v0.2.0 用户验收完成。Windows 原生 ARC 文件锁修复、macOS 验证和上游协作另行处理。不建设 GWRC Server。
+
 ## 下一阶段建议（按优先级）
 
 1. **完成可复现的 ARC 文献阅读桥**

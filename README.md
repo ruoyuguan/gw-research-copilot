@@ -10,6 +10,7 @@ The first MVP focuses on covariance and auto-PSD validation, a deliberately limi
 - `check-psd`: one-dimensional real auto-spectrum checks, frequency order and uniqueness, non-negativity, and required unit / spectral-convention declarations.
 - `fisher-demo`: a synthetic real Gaussian mean model with a fixed covariance, solved by Cholesky factorization and compared with an analytic Fisher matrix.
 - `doctor`: reports required and optional dependencies, static project-skill discovery, and optional ARC status.
+- `skills install/list/uninstall`: installs packaged Skills for a user or project, checks real CLI availability, and preserves modified or unrelated files on removal.
 - Every scientific command can write a new `run.json` and `report.md` containing input digests, parameters, software versions, timestamps, results, warnings, and failures.
 
 A valid singular covariance is not silently treated as invertible. A passing numerical check does not establish that a Gaussian model, PSD definition, detector response, or scientific conclusion is appropriate.
@@ -56,6 +57,17 @@ python -m pytest -q
 ```
 
 `doctor` does not query paper providers. An unconfigured optional ARC installation does not prevent local scientific tools from working.
+
+## Cross-project skill installation
+
+After installing the Python package, install the Skills and a launcher bound to that Python environment:
+
+```bash
+gwrc skills install --scope user
+gwrc skills list --scope user
+```
+
+The installer writes the four Skills to `$HOME/.agents/skills` and a CLI launcher to `$HOME/.local/bin` (including `gwrc.cmd` on Windows). That bin directory must already be on PATH; GWRC does not modify your shell or host configuration. You can then open an independent research project without copying Skill files or activating the original venv. See [docs/INSTALLATION.md](docs/INSTALLATION.md) for custom directories, PATH troubleshooting, project-scope installation, and safe uninstall behavior.
 
 ## Quick start with synthetic data
 
@@ -144,9 +156,9 @@ gwrc doctor --json
 gwrc arc-metadata arXiv:0911.3380 --output-dir runs/arc-metadata-demo
 ```
 
-On Windows, use the environment's `arc-paper.exe` path and your shell's normal environment-variable syntax. `doctor` checks only the local CLI help contract. A successful metadata operation can use ARC's cache or a provider and does not by itself constitute a literature review.
+On Windows, use the environment's `arc-paper.exe` path and your shell's normal environment-variable syntax. For an official launcher, set `GWRC_ARC_RUNTIME` instead; runtime probing uses read-only `arc-runtime doctor` and does not trigger setup. A successful metadata operation can use ARC's cache or a provider and does not by itself constitute a literature review.
 
-**Current verification status:** local ARC CLI installation and `doctor` probing succeeded on Windows, but actual metadata retrieval is blocked by a reproduced upstream `ac-jobs` Windows file-lock release error. Thus `arc-metadata` is an experimental bridge, not a functioning literature service on this machine. The numerical tools are unaffected. See [docs/ARC_INTEGRATION.md](docs/ARC_INTEGRATION.md) for exact commits, evidence, and unsupported workflows. Offline tests do not require ARC.
+**Current verification status:** the official ARC runtime in WSL2 Ubuntu completed metadata, table-of-contents, full-text search, and section reading, and the `GWRC_ARC_RUNTIME` adapter passed. Native Windows CLI probing works, but native Windows metadata retrieval remains blocked by the reproduced upstream `ac-jobs` file-lock release error. The numerical tools are unaffected. See [docs/ARC_INTEGRATION.md](docs/ARC_INTEGRATION.md) for exact commits, evidence, and unsupported workflows. Offline tests do not require ARC.
 
 ## Development and project layout
 

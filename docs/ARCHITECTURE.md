@@ -29,11 +29,12 @@ tools/covariance, psd, fisher integrations/arc.py
 - `tools/covariance.py`：协方差检查和独立数值诊断，不做求逆。
 - `tools/psd.py`：实值 auto-spectrum 检查，不做谱估计或约定换算。
 - `tools/fisher.py`：固定协方差的实 Gaussian mean Fisher 与解析演示。
-- `cli/main.py`：JSON 输入、命令参数、结果输出和记录协调。
-- `integrations/arc.py`：有超时的 ARC CLI 子进程与 v2 信封检查，无内置模型或模拟服务。
+- `cli/main.py`：JSON 输入、命令参数、结果输出和记录协调；非科学命令延迟加载科学依赖。
+- `cli/skills.py`、`skill_install.py`：Skill 资源定位、用户级/项目级安装、清单、启动器及安全卸载。
+- `integrations/arc.py`：有超时的 ARC CLI/runtime 子进程与 v2 信封检查，无内置模型或模拟服务。
 - `reporting/run.py`：输入摘要、环境、结果与失败记录；不判断科学有效性。
 
-`src/gwrc` 不读取 `.agents/skills`，因此安装 wheel 后不需要仓库中的 Skills 也能执行科学工具。Skills 通过公开 CLI/API 使用包，避免宿主逻辑污染数值实现。
+`.agents/skills` 是工作流内容的唯一来源，wheel 通过 `force-include` 携带同一文件。科学 API 不读取 Skill 文件；只有安装器从源码或 wheel 资源读取并安装它们。Skills 通过公开 CLI/API 使用包，避免宿主逻辑污染数值实现。
 
 ## 3. 关键决策
 

@@ -1,21 +1,24 @@
 """Strict JSON conversion that never emits NaN or infinity."""
 
 import json
+import math
 from typing import Any
-
-import numpy as np
 
 
 def to_builtin(value: Any) -> Any:
     """Convert NumPy values and containers to strict JSON-compatible values."""
-    if isinstance(value, np.generic):
-        return to_builtin(value.item())
-    if isinstance(value, np.ndarray):
-        return to_builtin(value.tolist())
+    value_module = type(value).__module__
+    if value_module == "numpy" or value_module.startswith("numpy."):
+        import numpy as np
+
+        if isinstance(value, np.generic):
+            return to_builtin(value.item())
+        if isinstance(value, np.ndarray):
+            return to_builtin(value.tolist())
     if isinstance(value, complex):
         raise TypeError("Complex values require an explicit real/imaginary schema")
     if isinstance(value, float):
-        if not np.isfinite(value):
+        if not math.isfinite(value):
             raise ValueError("Non-finite floats are not valid JSON results")
         return value
     if isinstance(value, dict):
