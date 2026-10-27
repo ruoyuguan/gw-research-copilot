@@ -14,13 +14,13 @@
 
 ## 2. 准备独立研究项目
 
-本清单对应的验收提交为 `35f9668a01bc01e496025bbee5d64b62f9f567ae`。不要使用尚未包含候选安装功能的旧 `main`：
+本清单对应的验收提交为 `7e7602d5aee2efb84573b3beafeca4718fdf46d0`。不要使用尚未包含候选安装功能的旧 `main`：
 
 ```bash
 git clone --branch feature/cross-project-agent \
   https://github.com/ruoyuguan/gw-research-copilot.git
 cd gw-research-copilot
-git checkout 35f9668a01bc01e496025bbee5d64b62f9f567ae
+git checkout 7e7602d5aee2efb84573b3beafeca4718fdf46d0
 ```
 
 先按 `INSTALLATION.md` 安装 Python 包并执行 `gwrc skills install --scope user`。然后使用合成示例创建独立项目，避免父目录 GWRC 的项目 Skills 掩盖用户级安装：

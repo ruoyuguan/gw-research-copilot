@@ -20,7 +20,7 @@ Windows Git Bash：
 git clone --branch feature/cross-project-agent \
   https://github.com/ruoyuguan/gw-research-copilot.git
 cd gw-research-copilot
-git checkout 35f9668a01bc01e496025bbee5d64b62f9f567ae
+git checkout 7e7602d5aee2efb84573b3beafeca4718fdf46d0
 python -m venv .venv
 .venv/Scripts/python -m pip install .
 ```

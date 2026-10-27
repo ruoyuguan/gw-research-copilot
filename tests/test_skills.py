@@ -54,5 +54,5 @@ def test_installation_docs_pin_candidate_and_limit_codex_claims() -> None:
 
     for document in (installation, acceptance):
         assert "git clone --branch feature/cross-project-agent" in document
-        assert "git checkout 35f9668a01bc01e496025bbee5d64b62f9f567ae" in document
+        assert "git checkout 7e7602d5aee2efb84573b3beafeca4718fdf46d0" in document
     assert "尚待真实宿主验证" in installation
