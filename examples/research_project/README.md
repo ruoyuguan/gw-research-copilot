@@ -27,3 +27,14 @@ gwrc check-cov data/covariance.json --output-dir runs/covariance
 ```
 
 A successful acceptance includes correct input reading, valid numerical reports, saved JSON/Markdown records, and an explanation that these checks do not prove the statistical model or physical interpretation. `runs/` is intentionally ignored.
+
+### Negative diagnostic checks
+
+The files `data/invalid_psd.json` and `data/invalid_covariance.json` intentionally contain a duplicate frequency, a negative auto-spectrum value, and a non-Hermitian matrix. They are synthetic negative examples, not observations.
+
+```bash
+gwrc check-psd data/invalid_psd.json --output-dir runs/invalid-psd
+gwrc check-cov data/invalid_covariance.json --output-dir runs/invalid-covariance
+```
+
+Both commands should exit with code 1 and `valid=false`, not 0. The run is still `completed` because the diagnostic finished, but it must include validation errors such as `duplicate_frequency`, `negative_psd`, and `not_hermitian`. Do not modify these inputs to force a pass or describe them as physically valid.

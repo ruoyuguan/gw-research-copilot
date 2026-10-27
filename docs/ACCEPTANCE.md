@@ -14,6 +14,15 @@
 
 ## 2. 准备独立研究项目
 
+本清单对应的验收提交为 `35f9668a01bc01e496025bbee5d64b62f9f567ae`。不要使用尚未包含候选安装功能的旧 `main`：
+
+```bash
+git clone --branch feature/cross-project-agent \
+  https://github.com/ruoyuguan/gw-research-copilot.git
+cd gw-research-copilot
+git checkout 35f9668a01bc01e496025bbee5d64b62f9f567ae
+```
+
 先按 `INSTALLATION.md` 安装 Python 包并执行 `gwrc skills install --scope user`。然后使用合成示例创建独立项目，避免父目录 GWRC 的项目 Skills 掩盖用户级安装：
 
 ```bash
@@ -64,6 +73,17 @@ gwrc check-cov data/covariance.json --output-dir runs/direct-covariance
 ```
 
 每次运行使用新目录，不能覆盖旧记录。
+
+### 负例与解释边界
+
+补充检查 `data/invalid_psd.json`（重复频率和负 PSD）以及 `data/invalid_covariance.json`（非 Hermitian 矩阵）。这些也是 synthetic，不是用于强迫通过测试的合法样本：
+
+```bash
+gwrc check-psd data/invalid_psd.json --output-dir runs/invalid-psd
+gwrc check-cov data/invalid_covariance.json --output-dir runs/invalid-covariance
+```
+
+正确行为是退出码 1、`valid=false`，并报告 `duplicate_frequency`、`negative_psd` 或 `not_hermitian` 等具体错误。`status=completed` 仅表示诊断执行结束，不表示科学检查通过。Agent 不得修改输入以消除错误，也不得把非法矩阵解释成正定、把非法 PSD 解释成有效物理谱，或声称这些错误证明更广泛的物理模型成立。
 
 ## 5. 记录证据
 

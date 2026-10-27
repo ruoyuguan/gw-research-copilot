@@ -1,0 +1,8 @@
+{
+  "data_origin": "synthetic",
+  "description": "Intentionally non-Hermitian matrix used as a negative covariance example; not an estimated covariance.",
+  "matrix": [
+    [1.0, 2.0],
+    [0.0, 1.0]
+  ]
+}

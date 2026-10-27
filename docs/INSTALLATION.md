@@ -17,8 +17,10 @@ GWRC 的 Python CLI 和 Agent Skills 是两个不同但相关的组件：
 Windows Git Bash：
 
 ```bash
-git clone https://github.com/ruoyuguan/gw-research-copilot.git
+git clone --branch feature/cross-project-agent \
+  https://github.com/ruoyuguan/gw-research-copilot.git
 cd gw-research-copilot
+git checkout 35f9668a01bc01e496025bbee5d64b62f9f567ae
 python -m venv .venv
 .venv/Scripts/python -m pip install .
 ```
@@ -96,7 +98,7 @@ gwrc --help
 
 ## 4. 在科研项目中调用
 
-打开自己的项目目录，不必再打开 GWRC 源码仓库。Kimi Code 和 Codex 都会发现用户级 `$HOME/.agents/skills`，但宿主可能需要新会话或重启。
+打开自己的项目目录，不必再打开 GWRC 源码仓库。Kimi 和 Codex 官方文档均声明扫描用户级 `$HOME/.agents/skills`，但当前已验证的是文件安装和 CLI 可执行性。**Codex 的真实宿主发现与调用尚待真实宿主验证，不能仅因目录存在就宣称已支持。** Kimi 的维护者工作流已通过，但这不等于 Codex 或未参与开发用户的验收。宿主可能需要新会话或重启。
 
 - Kimi：`/skill:gw-statistics`、`/skill:gw-theory`、`/skill:gw-literature`、`/skill:gw-review`。
 - Codex：`$gw-statistics`、`$gw-theory`、`$gw-literature`、`$gw-review`。

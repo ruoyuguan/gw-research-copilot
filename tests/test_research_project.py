@@ -53,3 +53,36 @@ def test_research_project_scientific_checks(tmp_path: Path) -> None:
         assert record["input"]["data_origin"] == "synthetic"
         assert record["status"] == "completed"
         assert (output / "report.md").is_file()
+
+
+def test_invalid_examples_are_reported_not_corrected(tmp_path: Path) -> None:
+    cases = (
+        ("check-psd", "invalid_psd.json", {"duplicate_frequency", "negative_psd"}),
+        ("check-cov", "invalid_covariance.json", {"not_hermitian"}),
+    )
+    for tool, filename, expected_codes in cases:
+        output = tmp_path / tool
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "gwrc",
+                tool,
+                str(PROJECT / "data" / filename),
+                "--output-dir",
+                str(output),
+            ],
+            cwd=PROJECT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+
+        assert completed.returncode == 1, completed.stderr
+        result = json.loads(completed.stdout)
+        assert not result["valid"]
+        assert expected_codes <= {item["code"] for item in result["errors"]}
+        record = json.loads((output / "run.json").read_text(encoding="utf-8"))
+        assert record["status"] == "completed"
+        assert record["input"]["data_origin"] == "synthetic"

@@ -1,0 +1,12 @@
+{
+  "data_origin": "synthetic",
+  "description": "Intentionally invalid auto-spectrum with a duplicate frequency and a negative value; not detector data.",
+  "frequency": [0.0, 1.0, 1.0],
+  "psd": [1.0, -0.01, 0.5],
+  "frequency_unit": "Hz",
+  "psd_unit": "synthetic_strain^2/Hz",
+  "psd_definition": "Intentionally invalid one-sided auto-spectrum used to test diagnostics; no correction is applied.",
+  "spectral_convention": "one-sided",
+  "fourier_convention": "No Fourier transform is performed by this negative example.",
+  "frequency_order": "increasing"
+}
