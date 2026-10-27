@@ -52,7 +52,7 @@ python3 -m venv .venv
 ~/.local/bin/gwrc.cmd         # Windows PowerShell/Cmd
 ```
 
-启动器调用安装时的 `sys.executable -m gwrc`，因此不必在其他项目中激活原 venv。若移动或删除该 Python 环境，需要重新安装启动器。不要先删除旧环境再尝试卸载；应先正常卸载，再迁移环境并重新安装。
+启动器调用安装时的 `sys.executable -m gwrc`，因此不必在其他项目中激活原 venv。若移动或删除该 Python 环境，需要重新安装启动器。不要先删除旧环境再尝试卸载；应先正常卸载，再迁移环境并重新安装。卸载旧启动器后，重装命令必须调用环境内的绝对路径，例如 `.venv/Scripts/gwrc skills install --scope user`（macOS/Linux 使用 `.venv/bin/gwrc`），不要继续调用刚被删除的启动器。
 
 `gwrc skills list` 检查 manifest、实际文件、内容哈希和 PATH 状态。`installed`、`already_installed`、`incomplete`、`not_installed`、`unmanaged` 和 `partially_uninstalled` 是不同状态；manifest 存在不自动等于可用。
 

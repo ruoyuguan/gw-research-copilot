@@ -96,7 +96,7 @@ Windows 挂载源码只用于创建原生 checkout，解决了 Git safe.director
 - 成功读取 `8 Conclusion and discussion`，并保留 `data.source.document` 引用；
 - `GWRC_ARC_RUNTIME` 的只读 doctor 和 `gwrc arc-metadata` 均完成，运行记录为 `status=completed`，上游响应也是 `completed`。
 
-证据位于 Git 忽略的 `.local/verification/arc-linux-gwrc-arc-validation.IqjjpZ/results/`。`scripts/validate_arc_linux.sh` 固化相同流程；`.github/workflows/arc-smoke.yml` 是手动 Ubuntu 复验入口，尚未在 GitHub 上运行，不能提前声称 CI smoke 已通过。
+证据位于 Git 忽略的 `.local/verification/arc-linux-gwrc-arc-validation.IqjjpZ/results/`。`scripts/validate_arc_linux.sh` 固化相同流程。修正 workflow 的 runner 上下文后，[ARC Linux smoke 40441495383](https://github.com/ruoyuguan/gw-research-copilot/actions/runs/40441495383) 已在 GitHub Ubuntu runner 成功完成，并上传 `arc-linux-validation` artifact；论文结构检查结果与本地一致。
 
 ### 真实元数据调用失败
 

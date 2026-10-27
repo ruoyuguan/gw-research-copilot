@@ -165,6 +165,18 @@ def test_launcher_works_in_bash(user_home: Path, tmp_path: Path) -> None:
     assert "check-cov" in completed.stdout
 
 
+@pytest.mark.skipif(os.name != "nt", reason="WSL fallback is Windows-specific")
+def test_launcher_has_wsl_path_fallback(user_home: Path) -> None:
+    install_skills("user", root=user_home)
+    script = (user_home / ".local" / "bin" / "gwrc").read_text(
+        encoding="utf-8"
+    )
+    drive = Path(sys.executable).drive.rstrip(":").lower()
+
+    assert f"if [ -x /mnt/{drive}/" in script
+    assert str(Path(sys.executable).as_posix()) in script
+
+
 @pytest.mark.skipif(os.name != "nt", reason="PowerShell launcher is Windows-specific")
 def test_launcher_works_in_powershell(user_home: Path, tmp_path: Path) -> None:
     install_skills("user", root=user_home)

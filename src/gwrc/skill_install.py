@@ -183,15 +183,30 @@ def _on_path(directory: Path) -> bool:
     return False
 
 
+def _wsl_interpreter_path(interpreter: Path) -> str | None:
+    """Return a WSL-mounted form of a Windows drive path, if applicable."""
+    raw = interpreter.as_posix()
+    if len(raw) >= 2 and raw[1] == ":" and raw[0].isalpha():
+        return f"/mnt/{raw[0].lower()}/{raw[2:].lstrip('/')}"
+    return None
+
+
 def _launcher_files() -> dict[str, bytes]:
     interpreter = Path(sys.executable).resolve()
     shell_path = shlex.quote(interpreter.as_posix())
-    files = {
-        "gwrc": (
-            "#!/bin/sh\n"
-            f"exec {shell_path} -m gwrc \"$@\"\n"
-        ).encode()
-    }
+    wsl_path = _wsl_interpreter_path(interpreter)
+    script = ["#!/bin/sh"]
+    if wsl_path is not None:
+        quoted_wsl_path = shlex.quote(wsl_path)
+        script.extend(
+            [
+                f"if [ -x {quoted_wsl_path} ]; then",
+                f"  exec {quoted_wsl_path} -m gwrc \"$@\"",
+                "fi",
+            ]
+        )
+    script.append(f"exec {shell_path} -m gwrc \"$@\"")
+    files = {"gwrc": ("\n".join(script) + "\n").encode()}
     if os.name == "nt":
         cmd_path = str(interpreter).replace("%", "%%")
         files["gwrc.cmd"] = (
