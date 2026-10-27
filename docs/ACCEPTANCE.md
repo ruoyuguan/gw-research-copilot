@@ -99,7 +99,40 @@ gwrc check-cov data/invalid_covariance.json --output-dir runs/invalid-covariance
 
 公开反馈不得包含账号令牌、私有研究资料、未发表论文、受限合作数据或含个人信息的日志。维护者 smoke 通过不等于新组员验收通过；没有实际组员证据时，该事项保持未完成。
 
-## 6. 常见问题
+## 6. 维护者 smoke 实测记录（2026-10-27）
+
+以下均为维护者测试，不是未参与开发的组员验收。原始事件日志包含本机路径，只保留在 Git 忽略的 `.local/acceptance/`，不公开上传。
+
+### Kimi：维护者工作流通过
+
+在独立 synthetic 项目中，通过用户级安装调用 `gw-statistics`，读取了 `analysis.py` 和四个输入文件。`runs/kimi-psd`、`runs/kimi-covariance` 的记录为 `status=completed`、`valid=true`，并生成了 `run.json` 和 `report.md`。负例 `runs/kimi-invalid-psd`、`runs/kimi-invalid-covariance` 的诊断执行完成但 `valid=false`，分别包含 `duplicate_frequency`、`negative_psd` 和 `not_hermitian`；没有修改输入来强迫通过。
+
+这些记录只证明数组、矩阵和声明检查按定义执行，不证明 PSD 估计、Gaussian likelihood、通道独立性或物理结论。
+
+### Codex CLI：部分通过，未通过端到端验收
+
+- 环境为 Windows，VS Code 扩展 `openai.chatgpt@26.1007.21434` 附带的 `codex-cli 0.162.0-alpha.17.2`，使用测试者已有 ChatGPT 登录。测试输入来自验收提交 `7e7602d5aee2efb84573b3beafeca4718fdf46d0`，独立目录有自己的 `.git`，用户级 GWRC 安装报告为 `0.1.0`。
+- 预检中，`gwrc skills list --scope user --json` 返回 `installed` 和 `command_available=true`，`analysis.py` 正确报告 synthetic、单边 PSD、4 个频率点和 2×2 协方差。
+- `codex exec` 使用 `--sandbox workspace-write`、`--ephemeral` 和独立 `--cd` 目录，没有使用绕过审批或沙箱的选项。`$gw-statistics` 确实被识别，Agent 读取了用户级 `~/.agents/skills/gw-statistics/SKILL.md`、`analysis.py` 和全部 synthetic 输入。这验证了 Codex CLI 的用户级 Skill 发现和读取，不只是检查文件是否存在。
+- 但四条 `gwrc check-psd`/`check-cov` 命令都未能启动 GWRC，实际退出码均为 101，而不是科学诊断的 0 或 1。启动器报告 `Unable to create process`；进一步直接启动当前 Microsoft Store Python 时得到 `Access is denied`。普通宿主外的预检成功不能替代这个沙箱内结果。
+- 测试期间出现 WebSocket 重连并回退到 HTTPS。后续命令又遇到 PowerShell 脚本执行策略拒绝和停滞，维护者约 11 分钟后停止任务。没有正常结束时的 Agent 总结，因此最终科学解释也未通过验收。
+- 停止后复核五个输入文件的 SHA-256，均与测试前一致。指定的四个输出目录均没有 GWRC `run.json`；Agent 尝试的替代 PowerShell 检查不被计为 GWRC 科学工具或验收记录。
+
+**初次结论：Codex CLI 的 Skill 发现与输入读取已通过，但在当时的 Microsoft Store Python 环境中，科学命令执行、标准记录和完整工作流未通过。此次没有操作 VS Code Codex 图形界面，也不能把本测试算作独立组员验收。**
+
+初次失败不能通过关闭沙箱、绕过审批或放宽 PowerShell 执行策略来掩盖。先用无模型诊断确定执行环境问题，再决定是否复验；替代脚本和手工结论都不能代替 GWRC 运行记录。
+
+### Codex CLI 修正环境后的复验：维护者端到端通过
+
+- 使用 `codex sandbox --permission-profile :workspace` 进行无模型诊断，复现了 Microsoft Store Python 的退出码 101。随后在 Git 忽略的 `.local/` 中通过 uv 0.13.5 安装标准 CPython 3.12.15，并在新 venv 中安装 GWRC 0.1.0 wheel、NumPy 2.5.4 和 SciPy 1.18.1；依赖检查通过。uv 只是本次测试工具，不是 GWRC 新增运行依赖。
+- 在 `:workspace` 沙箱中，新 Python 可加载 NumPy/SciPy，四个确定性检查分别返回预期的 0、0、1、1，负例报告相应错误，输入哈希不变。按安装器的安全卸载/重装流程更新用户级启动器后，Bash、PowerShell 和沙箱中的真实 `gwrc` 均可执行，记录确认使用新解释器。没有修改 PATH、宿主配置或执行策略，旧 `.venv` 保留用于回退。
+- 修正后仅运行一次新的 Agent 任务，使用来自同一验收提交的干净独立项目，以及与前次相同的 `codex exec --sandbox workspace-write --ephemeral` 方式。任务正常结束，事件日志中的四条实际命令退出码依次为 0、0、1、1。
+- 四份 `run.json` 和 `report.md` 均存在。两个正例为 `status=completed`、`valid=true`；两个负例为 `status=completed`、`valid=false`，包含 `duplicate_frequency`、`negative_psd` 和 `not_hermitian`。结构化复核确认输入 digest、新 Python 环境和命令参数正确，五个输入文件的 SHA-256 均未改变。
+- 最终回答明确数据为 synthetic，给出实际命令、退出码和记录路径，并区分数值检查、统计假设和物理结论。它没有把非法输入解释成有效结果，也没有声称 Gaussian、通道独立性、PSD 估计或物理模型已获证明。
+
+**复验结论：在上述 Windows、Codex CLI 和标准 CPython 环境中，用户级 `$gw-statistics` 的维护者端到端工作流通过。VS Code Codex 图形界面、自动路由、其他 Python 发行版及未参与开发的组员验收仍未完成；不能用此结果推断 GUI 已支持或 v0.2.0 用户验收条件已满足。**
+
+## 7. 常见问题
 
 - **只有源码仓库中的 Skill 被发现**：确认测试项目有独立 `.git`，不是直接位于 GWRC checkout 中的普通子目录。
 - **Skill 存在但命令找不到**：检查 `gwrc skills list` 和 PATH 中的启动器，不要仅重新复制 Markdown。

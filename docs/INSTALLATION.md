@@ -98,7 +98,11 @@ gwrc --help
 
 ## 4. 在科研项目中调用
 
-打开自己的项目目录，不必再打开 GWRC 源码仓库。Kimi 和 Codex 官方文档均声明扫描用户级 `$HOME/.agents/skills`，但当前已验证的是文件安装和 CLI 可执行性。**Codex 的真实宿主发现与调用尚待真实宿主验证，不能仅因目录存在就宣称已支持。** Kimi 的维护者工作流已通过，但这不等于 Codex 或未参与开发用户的验收。宿主可能需要新会话或重启。
+打开自己的项目目录，不必再打开 GWRC 源码仓库。Kimi 和 [Codex 官方文档](https://developers.openai.com/codex/skills) 均声明扫描用户级 `$HOME/.agents/skills`。Kimi 的维护者工作流已通过，但这不等于未参与开发用户的验收。
+
+**Codex CLI 的维护者端到端 smoke 已在标准 CPython 3.12.15 环境中通过；VS Code Codex 图形界面的发现与调用尚待真实宿主验证。** 2026-10-27 的初次测试发现，Windows 沙箱无法启动当时 venv 所依赖的 Microsoft Store Python，四条科学命令均返回启动失败码 101。换用项目内隔离的标准 CPython、重建 venv 并安全重装用户级启动器后，修正后的 `$gw-statistics` 工作流完成正负例检查并生成已核验的记录。
+
+如果沙箱报告 `Unable to create process` 或 `Access is denied`，先确认实际 Python 发行版及宿主权限。应选择宿主可执行的 Python 重建隔离环境，再按第 6 节安全卸载/重装启动器；只编辑 `gwrc.cmd` 不能修复不可执行的 venv base interpreter。不要关闭沙箱或放宽 PowerShell 执行策略。该通过结果限于所测 CLI 和 Python 环境，不代表所有宿主、自动路由或独立组员验收已完成。完整证据见 `ACCEPTANCE.md`。宿主可能需要新会话或重启。
 
 - Kimi：`/skill:gw-statistics`、`/skill:gw-theory`、`/skill:gw-literature`、`/skill:gw-review`。
 - Codex：`$gw-statistics`、`$gw-theory`、`$gw-literature`、`$gw-review`。

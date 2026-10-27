@@ -8,7 +8,9 @@
 
 已验证用户级 Skill 安装、PATH 启动器、安全卸载、wheel 资源，以及 WSL2 Ubuntu 上固定 ARC/AC commit 的官方 runtime、公开论文结构读取和 GWRC runtime 适配。`scripts/validate_arc_linux.sh` 固化该流程。
 
-仍需完成真实 Kimi/Codex 宿主 smoke 和未参与开发的组员验收；在此之前不宣称 v0.2.0 用户验收完成。Windows 原生 ARC 文件锁修复、macOS 验证和上游协作另行处理。不建设 GWRC Server。
+Kimi 维护者 smoke 已完成正负例检查并保存记录。Codex CLI 初次 smoke 暴露了 Windows 沙箱中的 Microsoft Store Python 执行问题；换用隔离的标准 CPython 3.12.15 并安全重装启动器后，修正后的维护者端到端工作流已通过，包含正负例、运行记录和科学限制解释。VS Code Codex 图形界面尚未验证。具体证据见 `ACCEPTANCE.md`。
+
+下一步验证 VS Code Codex 图形界面，并完成未参与开发的组员验收；在此之前不宣称 v0.2.0 用户验收完成。Windows 原生 ARC 文件锁修复、macOS 验证和上游协作另行处理。不建设 GWRC Server。
 
 ## 下一阶段建议（按优先级）
 

@@ -144,7 +144,9 @@ Start a new session after changing skill configuration. This blocks automatic mo
 
 ### Codex, Claude Code, and other hosts
 
-The Python CLI is independent of the agent host. The skill files use portable Markdown/YAML conventions, but their discovery and invocation on Codex and Claude Code have not been live-tested for this release; do not interpret that as verified native integration. Host-specific packaging can be added after real smoke tests. No model account, paid API, or model provider is selected by the numerical tools.
+The Python CLI is independent of the agent host. The skill files use portable Markdown/YAML conventions. The [official Codex Skills documentation](https://developers.openai.com/codex/skills) lists `$HOME/.agents/skills` as a user-level location. Windows maintainer tests with `codex-cli 0.162.0-alpha.17.2` first exposed a sandbox execution failure with the installed Microsoft Store Python. With an isolated standard CPython 3.12.15 environment and a launcher bound to it, a subsequent user-level `$gw-statistics` run under `workspace-write` completed valid and intentionally invalid checks with the expected exit codes and verified `run.json`/`report.md` records. The inputs remained unchanged. This verifies the Codex CLI workflow in that specific environment, not every Python distribution.
+
+The VS Code Codex graphical interface and Claude Code have not been live-tested for this release. A CLI result does not establish native IDE integration or acceptance by an independent researcher. See [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md) for both the initial failure and the successful follow-up. Host-specific packaging can be added after real smoke tests. No model account, paid API, or model provider is selected by the numerical tools.
 
 ## Optional ARC metadata bridge
 
