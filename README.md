@@ -1,5 +1,7 @@
 # GW Research Copilot (GWRC)
 
+**English** | [中文](README.zh-CN.md)
+
 **Early-development research software (0.1.0).** GWRC is a host-independent set of agent workflows, deterministic scientific checks, and reproducibility records for gravitational-wave research. It is not a language model, an automated source of scientific truth, or an official product of ARC, LISA, TianQin, or any university or laboratory.
 
 The first MVP focuses on covariance and auto-PSD validation, a deliberately limited Gaussian Fisher example, and evidence-conscious agent skills. It does **not** implement a complete LISA/TianQin analysis pipeline, a Bayesian sampler, a DWD population model, or a full SGWB Fisher calculator.
@@ -187,6 +189,12 @@ python -m build
 ```
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), and [docs/ROADMAP.md](docs/ROADMAP.md). Contributions follow the feature-branch + pull-request workflow described in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributors and AI-assisted development
+
+Development in this stage used the Kimi Code VS Code extension. The maintainer reports a development configuration of **K3.1 Pro with Thinking effort: Max**. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the human maintainer, AI-assisted implementation, and Codex CLI validation roles.
+
+These records disclose development assistance; they do not assign legal authorship or copyright ownership, and they do not make AI output scientifically correct by default. Human maintainers remain responsible for review, test evidence, scientific interpretation, and release decisions.
 
 ## License and scientific disclaimer
 

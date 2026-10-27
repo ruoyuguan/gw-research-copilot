@@ -12,7 +12,8 @@ GWRC 提供宿主无关的引力波科研 Skills、确定性数值工具和可�
 - `src/gwrc/reporting/` 负责运行记录，不包含科学判据。
 - `.agents/skills/` 是工作流内容的唯一来源；科学工具不读取它，`skill_install.py` 负责从源码或 wheel 资源安装 Skills。
 - `src/gwrc/skill_install.py` 负责用户级/项目级安装、清单、启动器与安全卸载，不得覆盖或递归删除未授权文件。
-- 文档主要使用中文；README 与国际社区文件使用英文。公共 Python API 使用类型标注和 docstring，遵循 PEP 8。
+- `README.md` 是英文主文档，`README.zh-CN.md` 是中文版本；功能、限制、安装和宿主支持变化必须同步。`CONTRIBUTORS.md` 记录实际贡献和 AI 辅助开发/验证，不伪造人员、模型版本或 Git 身份。
+- 其他文档主要使用中文，国际社区文件使用英文。公共 Python API 使用类型标注和 docstring，遵循 PEP 8。
 
 ## 科学不变量
 
