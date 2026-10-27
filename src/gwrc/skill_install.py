@@ -198,10 +198,13 @@ def _launcher_files() -> dict[str, bytes]:
     script = ["#!/bin/sh"]
     if wsl_path is not None:
         quoted_wsl_path = shlex.quote(wsl_path)
+        windows_literal = shlex.quote(str(interpreter))
         script.extend(
             [
                 f"if [ -x {quoted_wsl_path} ]; then",
                 f"  exec {quoted_wsl_path} -m gwrc \"$@\"",
+                "elif command -v cygpath >/dev/null 2>&1; then",
+                f"  exec \"$(cygpath -u {windows_literal})\" -m gwrc \"$@\"",
                 "fi",
             ]
         )

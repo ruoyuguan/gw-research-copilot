@@ -147,13 +147,32 @@ def test_launcher_runs_gwrc_outside_source_checkout(
         assert (user_home / ".local" / "bin" / "gwrc.cmd").is_file()
 
 
+def _host_bash() -> str | None:
+    if os.name != "nt":
+        return shutil.which("bash")
+    candidates = (
+        os.environ.get("KIMI_SHELL_PATH"),
+        r"C:\Program Files\Git\bin\bash.exe",
+        shutil.which("bash"),
+    )
+    return next(
+        (
+            candidate
+            for candidate in candidates
+            if candidate and Path(candidate).is_file()
+        ),
+        None,
+    )
+
+
 def test_launcher_works_in_bash(user_home: Path, tmp_path: Path) -> None:
     install_skills("user", root=user_home)
-    if shutil.which("bash") is None:
-        pytest.skip("Bash is unavailable")
+    bash = _host_bash()
+    if bash is None:
+        pytest.skip("Git for Windows Bash is unavailable")
 
     completed = subprocess.run(
-        ["bash", "-c", "command -v gwrc && gwrc --help"],
+        [bash, "-c", "command -v gwrc && gwrc --help"],
         cwd=tmp_path,
         capture_output=True,
         text=True,
@@ -161,7 +180,9 @@ def test_launcher_works_in_bash(user_home: Path, tmp_path: Path) -> None:
         check=False,
     )
 
-    assert completed.returncode == 0, completed.stderr
+    assert completed.returncode == 0, (
+        f"bash={bash}\nstdout={completed.stdout}\nstderr={completed.stderr}"
+    )
     assert "check-cov" in completed.stdout
 
 
@@ -174,6 +195,7 @@ def test_launcher_has_wsl_path_fallback(user_home: Path) -> None:
     drive = Path(sys.executable).drive.rstrip(":").lower()
 
     assert f"if [ -x /mnt/{drive}/" in script
+    assert "cygpath" in script
     assert str(Path(sys.executable).as_posix()) in script
 
 
